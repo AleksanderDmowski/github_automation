@@ -3,19 +3,20 @@ import sys
 import time
 from selenium import webdriver
 from selenium.webdriver.common.by import By
-from typing import overload
-from secret import secret
 from datetime import datetime
-import_ = os.path.join(os.path.dirname(__file__), 'Selenium')
+
+
+#secret is my source of password
+import_ = os.path.join(os.path.dirname(__file__), 'secret')
 sys.path.append(import_)
-from github_automation  import create_repository_on_github
+from secret import secret
 
 
 
 def create_auto_comment(update=False):
     comment='Initial comment'
     if update:
-        comment='Update {}'.format(datetime.today().strftime('%Y-%m-%d'),1)
+        comment='Update {}'.format(datetime.today().strftime('%Y-%m-%d %H:%M:%S'))
     return str(comment)
 
 def define_name(path):
@@ -38,11 +39,10 @@ def create_repository_on_github(user='user',password='123',repo_name='test',publ
     driver.quit()
 
 
-def create_repository(path, update=False):
+def create_repository_based_on(path, update=False, user='user', password='password', console_info=True):
     name = define_name(path)
     comment=create_auto_comment(update=update)
-    user='AleksanderDmowski'
-    create_repository_on_github(user=user, password=secret(), repo_name=name)
+    create_repository_on_github(user=user, password=password, repo_name=name)
     link = 'https://github.com/{}/{}.git'.format(user, name)
     repo = os.chdir(path)
     repo = os.system("git init {}".format(path))
@@ -52,8 +52,20 @@ def create_repository(path, update=False):
     repo = os.system("git commit -m \"{}\" {}".format(comment, path))
     repo = os.system("git branch -m main")
     repo = os.system("git push --set-upstream origin main")
+    if console_info:
+        print('Repo is added to GitHub')
     return repo
 
+def update_repository_based_on(path, update=True, console_info=True):
+    comment=create_auto_comment(update=update)
+    repo = os.system("git add {}".format(path))
+    repo = os.system("git commit -m \"{}\" {}".format(comment, path))
+    repo = os.system("git branch -m main")
+    repo = os.system("git push --set-upstream origin main")
+    if console_info:
+        print('Repo is added to GitHub')
+    return repo
 
-
-repo = create_repository(r"C:\Users\Aleksander\Desktop\test_{}".format(21))
+repo_init = create_repository_based_on(r"C:\Users\Aleksander\Desktop\github_automation", user='AleksanderDmowski', password=secret())
+repo_update =update_repository_based_on(r"C:\Users\Aleksander\Desktop\github_automation")
+repo_update
